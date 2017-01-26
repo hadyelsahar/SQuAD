@@ -11,6 +11,7 @@ from collections import defaultdict
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import WordPunctTokenizer
 
+
 class SquadReader:
 
     def __init__(self, max_vocabulary=50000):
