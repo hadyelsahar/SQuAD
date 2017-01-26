@@ -6,7 +6,6 @@ https://github.com/danqi/rc-cnn-dailymail/blob/master/code/nn_layers.py#L102
 """
 
 import json
-from __future__ import print_function
 from keras.preprocessing.text import text_to_word_sequence
 from glove import Glove
 import numpy as np
@@ -15,7 +14,7 @@ np.random.seed(1337)  # for reproducibility
 from keras.preprocessing import sequence
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Embedding, LSTM, Bidirectional
-from attention import BilinearAttentionLayer
+from modules.attention import BilinearAttentionLayer
 
 
 TRAIN_PATH = "./data/train-v1.1.json"
