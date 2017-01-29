@@ -9,31 +9,27 @@ https://github.com/danqi/rc-cnn-dailymail/blob/master/code/nn_layers.py#L102
 
 """
 
-import numpy as np
 from keras import backend as K
 from keras.engine.topology import Layer
 from keras.initializations import uniform
-
+from keras.layers import Merge
 
 class BilinearAttentionLayer(Layer):
 
-    def __init__(self, init=None, **kwargs):
+    def __init__(self, **kwargs):
         """
         :param init: weight initialization function. Can be the name of an existing function (str),
                 or a Theano function (see: https://keras.io/initializations/).
         :param kwargs:
         """
 
-        # loading weight initializations if not given
         # uniform (-0.01,0.01) are the values given in Chen et al. 2016 paper
-        if init is None:
-            def my_init(shape, name=None):
-                value = uniform(shape, scale=0.01)
-                return K.variable(value, name=name)
+        # if init is None:
+        def my_init(shape, name=None):
+            value = uniform(shape, scale=0.01)
+            return K.variable(value, name=name)
 
-            self.init = my_init
-        else:
-            self.init = init
+        self.init = my_init
 
         super(BilinearAttentionLayer, self).__init__(**kwargs)
 
@@ -50,7 +46,8 @@ class BilinearAttentionLayer(Layer):
         self.W = self.add_weight(shape=(input_shape[-1], input_shape[-1]),
                                  initializer=self.init,
                                  trainable=True)
-        super(BilinearAttentionLayer, self).build()  # Be sure to call this somewhere!
+
+        super(BilinearAttentionLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs,  mask=None):
         """
