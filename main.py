@@ -59,9 +59,8 @@ for c, i in enumerate(Aindx_train):
      y_train[c, i] = 1
 
 y_test = np.zeros((Aindx_test.shape[0], MAX_SEQ_WORD_LENGTH))
-for c, i in enumerate(Aindx_train):
+for c, i in enumerate(Aindx_test):
      y_test[c, i] = 1
-
 
 P_model = Sequential()
 P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=MAX_SEQ_WORD_LENGTH))
