@@ -78,7 +78,7 @@ class SquadReader:
                 word_counts[w] += 1
 
         word_counts = dict(word_counts)
-        word_counts = sorted(word_counts.items(), key=operator.itemgetter(1))
+        word_counts = sorted(word_counts.items(), reverse=True, key=operator.itemgetter(1))
 
         self.word_index = dict()
         self.word_index["__UOV_WORD__"] = 0
@@ -114,14 +114,14 @@ class SquadReader:
                 awid = wi
 
             w = p[cs:ce]
-            if w in self.word_index and self.word_counts[self.word_index[w]] < max_vocabulary:
+            if w in self.word_index and self.word_index[w] < max_vocabulary:
                 pp.append(self.word_index[w])
             else:
                 pp.append(0)
 
         for cs, ce in self.tokenize(q):
             w = p[cs:ce]
-            if w in self.word_index and self.word_counts[self.word_index[w]] < max_vocabulary:
+            if w in self.word_index and self.word_index[w] < max_vocabulary:
                 qpp.append(self.word_index[w])
             else:
                 qpp.append(0)
@@ -143,5 +143,5 @@ class SquadReader:
                                                  A: answer string (non-tokenized)
         """
 
-        return zip(*[self.preprocess_item(i) for i in zip(*x)])
+        return zip(*[self.preprocess_item(i, self.max_vocabulary) for i in zip(*x)])
 
