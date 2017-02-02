@@ -14,9 +14,8 @@ from nltk.tokenize import WordPunctTokenizer
 
 class SquadReader:
 
-    def __init__(self, max_vocabulary=50000):
+    def __init__(self, max_vocabulary=50000, base_word_id=2):
         """
-
         :param train_filename:
         :param test_filename:
         :param max_vocabulary: select the top K words in the vocabulary and the rest replace by id 0
@@ -25,7 +24,10 @@ class SquadReader:
         self.max_vocabulary = max_vocabulary
         self.tokenize = WordPunctTokenizer().span_tokenize    # return start and end of each word in an iterator
 
-        self.word_index = None                              # { word : word_index_sorted_by_occurence } # starting from 1  0 reserved for UOV_WORD
+        self.word_index = None                              # { word : word_index_sorted_by_occurence } # starting from 2  1 reserved for self.oov_id and zero for padding.
+        self.pad_id = 0
+        self.oov_id = 1
+        self.base_word_id = base_word_id
         self.inverse_word_index = None
         self.word_counts = None                             # { Word_index: count }
 
@@ -81,7 +83,8 @@ class SquadReader:
         word_counts = sorted(word_counts.items(), reverse=True, key=operator.itemgetter(1))
 
         self.word_index = dict()
-        self.word_index["__UOV_WORD__"] = 0
+        self.word_index["__PADDING__"] = self.pad_id
+        self.word_index["__OOV_WORD__"] = self.oov_id
         self.word_counts = dict()
 
         for i, (w, c) in enumerate(word_counts):
@@ -117,14 +120,14 @@ class SquadReader:
             if w in self.word_index and self.word_index[w] < max_vocabulary:
                 pp.append(self.word_index[w])
             else:
-                pp.append(0)
+                pp.append(self.oov_id)
 
         for cs, ce in self.tokenize(q):
             w = p[cs:ce]
             if w in self.word_index and self.word_index[w] < max_vocabulary:
                 qpp.append(self.word_index[w])
             else:
-                qpp.append(0)
+                qpp.append(self.oov_id)
 
         return pp, qpp, awid, a
 
