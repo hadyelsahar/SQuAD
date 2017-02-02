@@ -41,8 +41,8 @@ Q_train = sequence.pad_sequences(Q_train)
 MAX_SEQ_WORD_LENGTH = len(P_train[0])
 MAX_Q_WORD_LENGTH = len(Q_train[0])
 
-P_test = sequence.pad_sequences(P_test, maxlen=MAX_SEQ_WORD_LENGTH)
-Q_test = sequence.pad_sequences(Q_test, maxlen=MAX_Q_WORD_LENGTH)
+P_test = sequence.pad_sequences(P_test, maxlen=MAX_SEQ_WORD_LENGTH, padding='post')
+Q_test = sequence.pad_sequences(Q_test, maxlen=MAX_Q_WORD_LENGTH, padding='post')
 
 
 # hack because answers index sometimes can't match the tokenizer
@@ -65,15 +65,15 @@ y_test = np.zeros((Aindx_test.shape[0], MAX_SEQ_WORD_LENGTH))
 for c, i in enumerate(Aindx_test):
      y_test[c, i] = 1
 
+
 P_model = Sequential()
-P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=MAX_SEQ_WORD_LENGTH))
-P_model.add(Dropout(0.2))
+P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=MAX_SEQ_WORD_LENGTH, mask_zero=True))
+P_model.add(Dropout(0.1))
 P_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=True)))
 
-
 Q_model = Sequential()
-Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH))
-Q_model.add(Dropout(0.2))
+Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, mask_zero=True))
+Q_model.add(Dropout(0.1))
 Q_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=False)))
 
 model = Sequential()
