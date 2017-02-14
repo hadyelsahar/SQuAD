@@ -13,7 +13,8 @@ from keras.models import Sequential
 from keras.optimizers import SGD
 from keras.layers import Dense, Embedding, LSTM, Bidirectional, Dropout
 
-from modules.attention import BilinearAttentionLayer
+
+from nn_modules.attention import BilinearAttentionLayer, DotproductAttentionLayer
 from utils.datareader import SquadReader
 
 TRAIN_PATH = "./data/train-v1.1.json"
@@ -34,7 +35,6 @@ P_train, Q_train, Aindx_train, A_train = reader.transform(train)
 P_test, Q_test, Aindx_test, A_test = reader.transform(test)
 
 # preprocessing
-
 P_train = sequence.pad_sequences(P_train)
 Q_train = sequence.pad_sequences(Q_train)
 
@@ -77,11 +77,14 @@ Q_model.add(Dropout(0.1))
 Q_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=False)))
 
 model = Sequential()
-# model.add(DotproductAttentionLayer([P_model, Q_model]))
-model.add(BilinearAttentionLayer([P_model, Q_model]))
+model.add(DotproductAttentionLayer([P_model, Q_model]))
+# model.add(BilinearAttentionLayer([P_model, Q_model]))
+
 model.add(Dense(MAX_SEQ_WORD_LENGTH, activation='softmax'))
+
 model.compile(loss='categorical_crossentropy', optimizer=SGD(lr=0.1, clipnorm=10), metrics=['accuracy'])
 model.fit([P_train, Q_train], y_train, nb_epoch=N_EPOCHS, batch_size=32)
 
 scores = model.evaluate([P_test, Q_test], y_test)
 print("\n Model Accuracy: %.2f%%" % (scores[1]*100))
+
