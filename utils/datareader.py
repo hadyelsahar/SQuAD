@@ -88,7 +88,7 @@ class SquadReader:
         self.word_counts = dict()
 
         for i, (w, c) in enumerate(word_counts):
-            self.word_index[w] = i+1
+            self.word_index[w] = i+ 1 + self.base_word_id
             self.word_counts[i+1] = c
 
         self.inverse_word_index = {v: k for k, v in self.word_index.iteritems()}
@@ -122,8 +122,8 @@ class SquadReader:
             else:
                 pp.append(self.oov_id)
 
-        for cs, ce in self.tokenize(q):
-            w = p[cs:ce]
+        for wi, (cs, ce) in enumerate(self.tokenize(q)):
+            w = q[cs:ce]
             if w in self.word_index and self.word_index[w] < max_vocabulary:
                 qpp.append(self.word_index[w])
             else:
