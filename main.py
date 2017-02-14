@@ -18,9 +18,9 @@ from utils.datareader import SquadReader
 TRAIN_PATH = "./data/train-v1.1.json"
 TEST_PATH = "./data/dev-v1.1.json"
 
-TOP_WORDS = 30000
-EMB_VEC_LENGTH = 80
-HIDDEN_SIZE = 512
+TOP_WORDS = 60000
+EMB_VEC_LENGTH = 100
+HIDDEN_SIZE = 256
 N_EPOCHS = 5
 
 reader = SquadReader(TRAIN_PATH, TEST_PATH, TOP_WORDS)
