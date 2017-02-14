@@ -14,11 +14,13 @@ from utils.datareader import SquadReader
 
 TRAIN_PATH = "./data/train-v1.1.json"
 TEST_PATH = "./data/dev-v1.1.json"
+GLOVE_PATH = "./data/wordvec/glove.6B.100d.txt"
 
 TOP_WORDS = 50000
 EMB_VEC_LENGTH = 100
 HIDDEN_SIZE = 256
 N_EPOCHS = 5
+
 
 reader = SquadReader(TRAIN_PATH, TEST_PATH, TOP_WORDS)
 
@@ -26,14 +28,18 @@ reader = SquadReader(TRAIN_PATH, TEST_PATH, TOP_WORDS)
  [P_test, Q_test, A_test, Aindx_test, A_onehot_word_test]] = reader.prepare_train_dev()
 
 
+glove = Glove(GLOVE_PATH, reader.trimmed_word_index)
+EMB_VEC_LENGTH = glove.embedding_size
+
+
 P_model = Sequential()
-P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=P_train.shape[1]))
+P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=P_train.shape[1], weights=[glove.embedding_matrix]))
 P_model.add(Dropout(0.1))
 P_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=True)))
 P_model.add(Dense(2*HIDDEN_SIZE, activation='relu'))
 
 Q_model = Sequential()
-Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH))
+Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, weights=[glove.embedding_matrix]))
 Q_model.add(Dropout(0.1))
 Q_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=False)))
 
