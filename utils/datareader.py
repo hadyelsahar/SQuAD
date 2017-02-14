@@ -8,13 +8,13 @@ https://rajpurkar.github.io/SQuAD-explorer/
 import json
 import operator
 from collections import defaultdict
-from nltk.tokenize import word_tokenize
 from nltk.tokenize import WordPunctTokenizer
-
+from keras.preprocessing import sequence
+import numpy as np
 
 class SquadReader:
 
-    def __init__(self, max_vocabulary=50000, base_word_id=2):
+    def __init__(self, train_path, test_path, max_vocabulary=50000, base_word_id=2):
         """
         :param train_filename:
         :param test_filename:
@@ -30,6 +30,9 @@ class SquadReader:
         self.base_word_id = base_word_id
         self.inverse_word_index = None
         self.word_counts = None                             # { Word_index: count }
+        self.train_path = train_path
+        self.test_path = test_path
+
 
     def load_dataset(self, filename):
         """
@@ -133,7 +136,7 @@ class SquadReader:
 
     def transform(self, x):
         """
-        :param X: (P, Q, S, A) as got from self.load_dataset()
+        :param x: (P, Q, S, A) as got from self.load_dataset()
         :return:
 
             tokenize P and Q
@@ -148,3 +151,41 @@ class SquadReader:
 
         return zip(*[self.preprocess_item(i, self.max_vocabulary) for i in zip(*x)])
 
+    def prepare_train_dev(self):
+
+        train = self.load_dataset(self.train_path)
+        test =  self.load_dataset(self.test_path)
+        self.fit(train[0] + train[1] + test[0] + test[1])
+
+        P_train, Q_train, Aindx_train, A_train = self.transform(train)
+        P_test, Q_test, Aindx_test, A_test = self.transform(test)
+
+        # preprocessing
+        P_train = sequence.pad_sequences(P_train)
+        Q_train = sequence.pad_sequences(Q_train)
+
+        P_test = sequence.pad_sequences(P_test, padding='post')
+        Q_test = sequence.pad_sequences(Q_test, padding='post')
+
+        # because answers index sometimes can't match the tokenizer
+        P_train = np.array([i for c, i in enumerate(P_train) if Aindx_train[c] is not None])
+        P_test = np.array([i for c, i in enumerate(P_test) if Aindx_test[c] is not None])
+        Q_train = np.array([i for c, i in enumerate(Q_train) if Aindx_train[c] is not None])
+        Q_test = np.array([i for c, i in enumerate(Q_test) if Aindx_test[c] is not None])
+        A_train = np.array([i for c, i in enumerate(A_train) if Aindx_train[c] is not None])
+        A_test = [i for c, i in enumerate(A_test) if Aindx_test[c] is not None]
+        Aindx_train = np.array([i for c, i in enumerate(Aindx_train) if Aindx_train[c] is not None])
+        Aindx_test = np.array([i for c, i in enumerate(Aindx_test) if Aindx_test[c] is not None])
+
+        MAX_SEQ_WORD_LENGTH = len(P_train[0])
+
+        # create y as one hot vector
+        A_onehot_word_train = np.zeros((Aindx_train.shape[0], MAX_SEQ_WORD_LENGTH))
+        for c, i in enumerate(Aindx_train):
+            A_onehot_word_train[c, i] = 1
+
+        A_onehot_word_test = np.zeros((Aindx_test.shape[0], MAX_SEQ_WORD_LENGTH))
+        for c, i in enumerate(Aindx_test):
+            A_onehot_word_test[c, i] = 1
+
+        return [[P_train, Q_train, A_train, Aindx_train, A_onehot_word_train],[P_test, Q_test, A_test, Aindx_test,A_onehot_word_test]]
