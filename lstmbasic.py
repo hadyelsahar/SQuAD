@@ -3,6 +3,7 @@ simple bidirectional lstm model
 """
 
 import numpy as np
+from utils.glove import Glove
 np.random.seed(1337)  # for reproducibility
 
 from keras.models import Sequential
