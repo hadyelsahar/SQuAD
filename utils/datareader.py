@@ -154,18 +154,17 @@ class SquadReader:
     def prepare_train_dev(self):
 
         train = self.load_dataset(self.train_path)
-        test =  self.load_dataset(self.test_path)
+        test = self.load_dataset(self.test_path)
         self.fit(train[0] + train[1] + test[0] + test[1])
 
         P_train, Q_train, Aindx_train, A_train = self.transform(train)
         P_test, Q_test, Aindx_test, A_test = self.transform(test)
 
         # preprocessing
-        P_train = sequence.pad_sequences(P_train)
-        Q_train = sequence.pad_sequences(Q_train)
-
-        P_test = sequence.pad_sequences(P_test, padding='post')
-        Q_test = sequence.pad_sequences(Q_test, padding='post')
+        P_train = sequence.pad_sequences(P_train, padding='post', value=self.pad_id)
+        Q_train = sequence.pad_sequences(Q_train, padding='post', value=self.pad_id)
+        P_test = sequence.pad_sequences(P_test, padding='post', value=self.pad_id)
+        Q_test = sequence.pad_sequences(Q_test, padding='post', value=self.pad_id)
 
         # because answers index sometimes can't match the tokenizer
         P_train = np.array([i for c, i in enumerate(P_train) if Aindx_train[c] is not None])

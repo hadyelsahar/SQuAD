@@ -18,11 +18,10 @@ from utils.datareader import SquadReader
 TRAIN_PATH = "./data/train-v1.1.json"
 TEST_PATH = "./data/dev-v1.1.json"
 
-TOP_WORDS = 50000
-EMB_VEC_LENGTH = 100
-HIDDEN_SIZE = 256
-N_EPOCHS = 30
-
+TOP_WORDS = 30000
+EMB_VEC_LENGTH = 80
+HIDDEN_SIZE = 512
+N_EPOCHS = 5
 
 reader = SquadReader(TRAIN_PATH, TEST_PATH, TOP_WORDS)
 
@@ -46,7 +45,8 @@ model.add(BilinearAttentionLayer([P_model, Q_model]))
 
 model.add(Dense(P_train.shape[1], activation='softmax'))
 
-model.compile(loss='categorical_crossentropy', optimizer=SGD(lr=0.1, clipnorm=10), metrics=['accuracy'])
+# sgd = SGD(lr=0.1, clipnorm=10)
+model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 model.fit([P_train, Q_train], A_onehot_word_train, nb_epoch=N_EPOCHS, batch_size=32)
 
 scores = model.evaluate([P_test, Q_test], A_onehot_word_test)
