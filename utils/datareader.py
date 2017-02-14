@@ -28,10 +28,13 @@ class SquadReader:
         self.pad_id = 0
         self.oov_id = 1
         self.base_word_id = base_word_id
-        self.inverse_word_index = None
+        self.inverse_word_index = None                      # initialized with fit it's another version of the dictionary that is the size of max vocab size
         self.word_counts = None                             # { Word_index: count }
         self.train_path = train_path
         self.test_path = test_path
+        self.trimmed_word_index = None                      # initialized with fit it's another version of the dictionary that is the size of max vocab size
+
+
 
 
     def load_dataset(self, filename):
@@ -95,6 +98,10 @@ class SquadReader:
             self.word_counts[i+1] = c
 
         self.inverse_word_index = {v: k for k, v in self.word_index.iteritems()}
+
+        tmp = sorted(self.word_index.items(), key=operator.itemgetter(1))
+        tmp = tmp[:self.max_vocabulary]
+        self.trimmed_word_index = dict(tmp)
 
     def preprocess_item(self, (p, q, s, a), max_vocabulary=None):
         """
