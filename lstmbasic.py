@@ -27,13 +27,13 @@ reader = SquadReader(TRAIN_PATH, TEST_PATH, TOP_WORDS)
 
 
 P_model = Sequential()
-P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=P_train.shape[1], mask_zero=True))
+P_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, input_length=P_train.shape[1]))
 P_model.add(Dropout(0.1))
 P_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=True)))
 P_model.add(Dense(HIDDEN_SIZE, activation='relu'))
 
 Q_model = Sequential()
-Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH, mask_zero=True))
+Q_model.add(Embedding(TOP_WORDS, EMB_VEC_LENGTH))
 Q_model.add(Dropout(0.1))
 Q_model.add(Bidirectional(LSTM(HIDDEN_SIZE, return_sequences=False)))
 
